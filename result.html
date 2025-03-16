@@ -1,0 +1,8 @@
+<h2>Image Similarity Score: {{ score }}</h2>
+{% if score >= 0.9 %}
+    <p>✅ Highly similar (Same Signature/Person)</p>
+{% elif score >= 0.7 %}
+    <p>⚠️ Moderately similar (Slight Differences)</p>
+{% else %}
+    <p>❌ Different (Forgery Detected)</p>
+{% endif %}
