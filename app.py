@@ -1,8 +1,8 @@
 from PIL import Image
 import numpy as np
-from tensorflow.keras.applications import VGG16
-from tensorflow.keras.models import Model
-from tensorflow.keras.preprocessing.image import img_to_array
+from tensorflow.keras.applications import VGG16 # type: ignore
+from tensorflow.keras.models import Model # type: ignore
+from tensorflow.keras.preprocessing.image import img_to_array # type: ignore
 from sklearn.metrics.pairwise import cosine_similarity
 from flask import Flask, request, render_template
 import os
