@@ -1,9 +1,57 @@
-<form action="/" method="post" enctype="multipart/form-data">
-    <label>Upload First Image:</label>
-    <input type="file" name="input_image" required><br><br>
+<<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signature Verification</title>
+</head>
+<body>
+    <h2>Signature Verification</h2>
+    <form id="verify-form">
+        <label for="input_image_url">Input Image URL:</label>
+        <input type="text" id="input_image_url" name="input_image_url" required>
+        <br><br>
 
-    <label>Upload Second Image:</label>
-    <input type="file" name="comparison_image" required><br><br>
+        <label for="comparison_image_urls">Reference Image URLs (comma-separated):</label>
+        <input type="text" id="comparison_image_urls" name="comparison_image_urls" required>
+        <br><br>
 
-    <input type="submit" value="Compare Images">
-</form>
+        <label for="similarity_threshold">Similarity Threshold (0-1):</label>
+        <input type="number" id="similarity_threshold" name="similarity_threshold" step="0.01" min="0" max="1" value="0.8">
+        <br><br>
+
+        <button type="submit">Verify Signature</button>
+    </form>
+
+    <h3>Result:</h3>
+    <p id="result"></p>
+
+    <script>
+        document.getElementById("verify-form").addEventListener("submit", function(event) {
+            event.preventDefault();  // Prevent default form submission
+            
+            let inputImageUrl = document.getElementById("input_image_url").value;
+            let comparisonImageUrls = document.getElementById("comparison_image_urls").value.split(",");
+            let similarityThreshold = parseFloat(document.getElementById("similarity_threshold").value);
+
+            fetch("/compare", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    input_image_url: inputImageUrl,
+                    comparison_image_urls: comparisonImageUrls,
+                    similarity_threshold: similarityThreshold
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("result").innerText = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("result").innerText = "An error occurred.";
+            });
+        });
+    </script>
+</body>
+</html>
