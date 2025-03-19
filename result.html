@@ -1,8 +1,67 @@
-<h2>Image Similarity Score: {{ score }}</h2>
-{% if score >= 0.9 %}
-    <p>✅ Highly similar (Same Signature/Person)</p>
-{% elif score >= 0.7 %}
-    <p>⚠️ Moderately similar (Slight Differences)</p>
-{% else %}
-    <p>❌ Different (Forgery Detected)</p>
-{% endif %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            text-align: center;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Signature Verification Result</h2>
+        <p><strong>Input Image:</strong></p>
+        <div class="image-container">
+            <img id="input-image" src="" alt="Input Image">
+        </div>
+
+        <h3>Matched Reference Images:</h3>
+        <div id="matched-images"></div>
+
+        <h3>Confidence Score:</h3>
+        <p id="confidence-score"></p>
+
+        <a href="index.html">Try Another Image</a>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let resultData = JSON.parse(localStorage.getItem("verification_result"));
+
+            if (resultData) {
+                document.getElementById("input-image").src = resultData.input_image_url;
+                document.getElementById("confidence-score").innerText = 
+                    resultData.confidence_score ? resultData.confidence_score + "%" : "N/A";
+
+                let matchedImagesDiv = document.getElementById("matched-images");
+                if (resultData.similar_images.length > 0) {
+                    resultData.similar_images.forEach(imgUrl => {
+                        let imgElement = document.createElement("img");
+                        imgElement.src = imgUrl;
+                        imgElement.style = "max-width: 100%; height: auto; margin: 10px;";
+                        matchedImagesDiv.appendChild(imgElement);
+                    });
+                } else {
+                    matchedImagesDiv.innerHTML = "<p>No similar images found.</p>";
+                }
+            } else {
+                document.body.innerHTML = "<h2>Error: No result data found.</h2><a href='index.html'>Go Back</a>";
+            }
+        });
+    </script>
+</body>
+</html>
