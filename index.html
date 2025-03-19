@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -45,7 +45,15 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById("result").innerText = JSON.stringify(data, null, 2);
+                // Store the result in localStorage
+                localStorage.setItem("verification_result", JSON.stringify({
+                    input_image_url: inputImageUrl,
+                    similar_images: data.similar_images || [],
+                    confidence_score: data.confidence_score || "N/A"
+                }));
+
+                // Redirect to result page
+                window.location.href = "result.html";
             })
             .catch(error => {
                 console.error("Error:", error);
