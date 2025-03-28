@@ -7,7 +7,7 @@
 </head>
 <body>
     <h2>Signature Verification</h2>
-    <form id="verify-form" enctype="multipart/form-data">
+    <form id="verify-form">
         <label for="user_photo">User Image (for verification):</label>
         <input type="file" id="user_photo" name="user_photo" required>
         <br><br>
@@ -29,14 +29,14 @@
     <script>
         document.getElementById("verify-form").addEventListener("submit", function(event) {
             event.preventDefault();  // Prevent default form submission
-            
+
             let formData = new FormData();
             formData.append("user_photo", document.getElementById("user_photo").files[0]);
-            let referencePhotos = document.getElementById("reference_photos").files;
-            for (let i = 0; i < referencePhotos.length; i++) {
-                formData.append("reference_photos", referencePhotos[i]);
+
+            let refPhotos = document.getElementById("reference_photos").files;
+            for (let i = 0; i < refPhotos.length; i++) {
+                formData.append("reference_photos", refPhotos[i]);
             }
-            formData.append("similarity_threshold", document.getElementById("similarity_threshold").value);
 
             fetch("/compare", {
                 method: "POST",
@@ -44,12 +44,10 @@
             })
             .then(response => response.json())
             .then(data => {
-                // Display the result
-                if (data.similar_images) {
-                    document.getElementById("result").innerText = "Similar images: " + data.similar_images.join(", ");
-                } else {
-                    document.getElementById("result").innerText = "No similar images found.";
-                }
+                // Display results
+                document.getElementById("result").innerHTML = data.similar_images.length > 0 ?
+                    "Similar Images: " + data.similar_images.join(", ") :
+                    "No similar images found.";
             })
             .catch(error => {
                 console.error("Error:", error);
