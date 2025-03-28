@@ -3,65 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verification Result</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: auto;
-            text-align: center;
-        }
-        .image-container img {
-            max-width: 100%;
-            height: auto;
-            margin-top: 10px;
-        }
-    </style>
+    <title>Signature Verification Result</title>
 </head>
 <body>
-    <div class="container">
-        <h2>Signature Verification Result</h2>
-        <p><strong>Input Image:</strong></p>
-        <div class="image-container">
-            <img id="input-image" src="" alt="Input Image">
-        </div>
+    <h2>Signature Verification Result</h2>
 
-        <h3>Matched Reference Images:</h3>
-        <div id="matched-images"></div>
+    <h3>User Image:</h3>
+    <img id="user-image" src="" alt="User uploaded image" style="max-width: 300px; display: none;">
 
-        <h3>Confidence Score:</h3>
-        <p id="confidence-score"></p>
+    <h3>Similar Reference Images:</h3>
+    <div id="similar-images"></div>
 
-        <a href="index.html">Try Another Image</a>
-    </div>
+    <h3>Confidence Score:</h3>
+    <p id="confidence-score"></p>
+
+    <button onclick="goBack()">Verify Another Signature</button>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            let resultData = JSON.parse(localStorage.getItem("verification_result"));
+        // Load results from localStorage
+        let resultData = localStorage.getItem("verification_result");
 
-            if (resultData) {
-                document.getElementById("input-image").src = resultData.input_image_url;
+        if (resultData) {
+            try {
+                resultData = JSON.parse(resultData);
+
+                if (resultData.input_image_url) {
+                    let userImage = document.getElementById("user-image");
+                    userImage.src = resultData.input_image_url;
+                    userImage.style.display = "block"; // Show the image if available
+                }
+
                 document.getElementById("confidence-score").innerText = 
-                    resultData.confidence_score ? resultData.confidence_score + "%" : "N/A";
+                    resultData.confidence_score ? `Confidence: ${resultData.confidence_score}` : "Confidence score unavailable.";
 
-                let matchedImagesDiv = document.getElementById("matched-images");
-                if (resultData.similar_images.length > 0) {
-                    resultData.similar_images.forEach(imgUrl => {
+                const similarImagesContainer = document.getElementById("similar-images");
+                if (resultData.similar_images && resultData.similar_images.length > 0) {
+                    resultData.similar_images.forEach(imageUrl => {
                         let imgElement = document.createElement("img");
-                        imgElement.src = imgUrl;
-                        imgElement.style = "max-width: 100%; height: auto; margin: 10px;";
-                        matchedImagesDiv.appendChild(imgElement);
+                        imgElement.src = imageUrl;
+                        imgElement.style.maxWidth = "200px";
+                        imgElement.style.margin = "10px";
+                        similarImagesContainer.appendChild(imgElement);
                     });
                 } else {
-                    matchedImagesDiv.innerHTML = "<p>No similar images found.</p>";
+                    similarImagesContainer.innerText = "No similar images found.";
                 }
-            } else {
-                document.body.innerHTML = "<h2>Error: No result data found.</h2><a href='index.html'>Go Back</a>";
+
+            } catch (error) {
+                console.error("Error parsing result data:", error);
+                document.body.innerHTML += "<h2 style='color:red;'>Error: Could not load verification results.</h2>";
             }
-        });
+        } else {
+            document.body.innerHTML += "<h2 style='color:red;'>Error: No verification results found in localStorage.</h2>";
+        }
+
+        function goBack() {
+            window.location.href = "index.html";
+        }
     </script>
 </body>
 </html>
