@@ -7,52 +7,50 @@
 </head>
 <body>
     <h2>Signature Verification</h2>
+    
     <form id="verify-form">
-        <label for="user_photo">User Image (for verification):</label>
-        <input type="file" id="user_photo" name="user_photo" required>
-        <br><br>
+        <label>User Image (for verification):</label>
+        <input type="file" name="user_photo" required><br><br>
 
-        <label for="reference_photos">Reference Images (for comparison):</label>
-        <input type="file" id="reference_photos" name="reference_photos" multiple required>
-        <br><br>
-
-        <label for="similarity_threshold">Similarity Threshold (0-1):</label>
-        <input type="number" id="similarity_threshold" name="similarity_threshold" step="0.01" min="0" max="1" value="0.8">
-        <br><br>
+        <label>Reference Images (for comparison):</label>
+        <input type="file" name="reference_photos" multiple required><br><br>
 
         <button type="submit">Verify Signature</button>
     </form>
 
     <h3>Result:</h3>
-    <p id="result"></p>
+    <p id="result-message"></p>
 
     <script>
-        document.getElementById("verify-form").addEventListener("submit", function(event) {
-            event.preventDefault();  // Prevent default form submission
+        document.getElementById("verify-form").addEventListener("submit", async function(event) {
+            event.preventDefault(); // Prevent form from refreshing the page
 
-            let formData = new FormData();
-            formData.append("user_photo", document.getElementById("user_photo").files[0]);
+            let formData = new FormData(this);
 
-            let refPhotos = document.getElementById("reference_photos").files;
-            for (let i = 0; i < refPhotos.length; i++) {
-                formData.append("reference_photos", refPhotos[i]);
+            try {
+                let response = await fetch("/compare", {
+                    method: "POST",
+                    body: formData
+                });
+
+                let result = await response.json();
+
+                // Debugging: Log the response
+                console.log("API Response:", result);
+
+                if (result.error) {
+                    document.getElementById("result-message").innerText = "Error: " + result.error;
+                } else {
+                    // Save result in localStorage
+                    localStorage.setItem("verification_result", JSON.stringify(result));
+
+                    // Redirect to results page
+                    window.location.href = "result.html";
+                }
+            } catch (error) {
+                console.error("Error occurred while verifying signature:", error);
+                document.getElementById("result-message").innerText = "An error occurred. Please try again.";
             }
-
-            fetch("/compare", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Display results
-                document.getElementById("result").innerHTML = data.similar_images.length > 0 ?
-                    "Similar Images: " + data.similar_images.join(", ") :
-                    "No similar images found.";
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                document.getElementById("result").innerText = "An error occurred.";
-            });
         });
     </script>
 </body>
