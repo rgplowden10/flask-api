@@ -17,6 +17,8 @@
     <h3>Confidence Score:</h3>
     <p id="confidence-score"></p>
 
+    <h3 style="color: red;" id="error-message"></h3>
+
     <button onclick="goBack()">Verify Another Signature</button>
 
     <script>
@@ -27,34 +29,37 @@
             try {
                 resultData = JSON.parse(resultData);
 
-                if (resultData.input_image_url) {
-                    let userImage = document.getElementById("user-image");
-                    userImage.src = resultData.input_image_url;
-                    userImage.style.display = "block"; // Show the image if available
-                }
-
-                document.getElementById("confidence-score").innerText = 
-                    resultData.confidence_score ? `Confidence: ${resultData.confidence_score}` : "Confidence score unavailable.";
-
-                const similarImagesContainer = document.getElementById("similar-images");
-                if (resultData.similar_images && resultData.similar_images.length > 0) {
-                    resultData.similar_images.forEach(imageUrl => {
-                        let imgElement = document.createElement("img");
-                        imgElement.src = imageUrl;
-                        imgElement.style.maxWidth = "200px";
-                        imgElement.style.margin = "10px";
-                        similarImagesContainer.appendChild(imgElement);
-                    });
+                if (resultData.error) {
+                    document.getElementById("error-message").innerText = resultData.error;
                 } else {
-                    similarImagesContainer.innerText = "No similar images found.";
-                }
+                    if (resultData.input_image_url) {
+                        let userImage = document.getElementById("user-image");
+                        userImage.src = resultData.input_image_url;
+                        userImage.style.display = "block"; // Show the image if available
+                    }
 
+                    document.getElementById("confidence-score").innerText = 
+                        resultData.confidence_score ? `Confidence: ${resultData.confidence_score}` : "Confidence score unavailable.";
+
+                    const similarImagesContainer = document.getElementById("similar-images");
+                    if (resultData.similar_images && resultData.similar_images.length > 0) {
+                        resultData.similar_images.forEach(imageUrl => {
+                            let imgElement = document.createElement("img");
+                            imgElement.src = imageUrl;
+                            imgElement.style.maxWidth = "200px";
+                            imgElement.style.margin = "10px";
+                            similarImagesContainer.appendChild(imgElement);
+                        });
+                    } else {
+                        similarImagesContainer.innerText = "No similar images found.";
+                    }
+                }
             } catch (error) {
                 console.error("Error parsing result data:", error);
-                document.body.innerHTML += "<h2 style='color:red;'>Error: Could not load verification results.</h2>";
+                document.getElementById("error-message").innerText = "Could not load verification results.";
             }
         } else {
-            document.body.innerHTML += "<h2 style='color:red;'>Error: No verification results found in localStorage.</h2>";
+            document.getElementById("error-message").innerText = "No verification results found in localStorage.";
         }
 
         function goBack() {
