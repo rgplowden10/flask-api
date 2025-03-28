@@ -7,13 +7,13 @@
 </head>
 <body>
     <h2>Signature Verification</h2>
-    <form id="verify-form">
-        <label for="input_image_url">Input Image URL:</label>
-        <input type="text" id="input_image_url" name="input_image_url" required>
+    <form id="verify-form" enctype="multipart/form-data">
+        <label for="user_photo">User Image (for verification):</label>
+        <input type="file" id="user_photo" name="user_photo" required>
         <br><br>
 
-        <label for="comparison_image_urls">Reference Image URLs (comma-separated):</label>
-        <input type="text" id="comparison_image_urls" name="comparison_image_urls" required>
+        <label for="reference_photos">Reference Images (for comparison):</label>
+        <input type="file" id="reference_photos" name="reference_photos" multiple required>
         <br><br>
 
         <label for="similarity_threshold">Similarity Threshold (0-1):</label>
@@ -30,30 +30,26 @@
         document.getElementById("verify-form").addEventListener("submit", function(event) {
             event.preventDefault();  // Prevent default form submission
             
-            let inputImageUrl = document.getElementById("input_image_url").value;
-            let comparisonImageUrls = document.getElementById("comparison_image_urls").value.split(",");
-            let similarityThreshold = parseFloat(document.getElementById("similarity_threshold").value);
+            let formData = new FormData();
+            formData.append("user_photo", document.getElementById("user_photo").files[0]);
+            let referencePhotos = document.getElementById("reference_photos").files;
+            for (let i = 0; i < referencePhotos.length; i++) {
+                formData.append("reference_photos", referencePhotos[i]);
+            }
+            formData.append("similarity_threshold", document.getElementById("similarity_threshold").value);
 
             fetch("/compare", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    input_image_url: inputImageUrl,
-                    comparison_image_urls: comparisonImageUrls,
-                    similarity_threshold: similarityThreshold
-                })
+                body: formData
             })
             .then(response => response.json())
             .then(data => {
-                // Store the result in localStorage
-                localStorage.setItem("verification_result", JSON.stringify({
-                    input_image_url: inputImageUrl,
-                    similar_images: data.similar_images || [],
-                    confidence_score: data.confidence_score || "N/A"
-                }));
-
-                // Redirect to result page
-                window.location.href = "result.html";
+                // Display the result
+                if (data.similar_images) {
+                    document.getElementById("result").innerText = "Similar images: " + data.similar_images.join(", ");
+                } else {
+                    document.getElementById("result").innerText = "No similar images found.";
+                }
             })
             .catch(error => {
                 console.error("Error:", error);
