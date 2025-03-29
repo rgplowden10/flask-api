@@ -8,7 +8,7 @@ STATIC_FOLDER = "static"
 if not os.path.exists(STATIC_FOLDER):
     os.makedirs(STATIC_FOLDER)
 
-@app.route("/compare", methods=["GET"])
+@app.route("/compare", methods=["POST"])
 def home():
     """Serve the homepage with the form."""
     return render_template("index.html")
