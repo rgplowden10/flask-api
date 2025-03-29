@@ -8,7 +8,7 @@ STATIC_FOLDER = "static"
 if not os.path.exists(STATIC_FOLDER):
     os.makedirs(STATIC_FOLDER)
 
-@app.route("/compare", methods=["POST"])
+@app.route("/compare", methods=["GET"])
 def home():
     """Serve the homepage with the form."""
     return render_template("index.html")
@@ -51,6 +51,45 @@ def compare():
         print("Response Data:", response_data)  # Debugging
 
         return jsonify(response_data), 200
+
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+# -------------------------------
+# NEW: ADDING /verify-signature ROUTE
+# -------------------------------
+@app.route("/verify-signature", methods=["POST"])
+def verify_signature():
+    """Verify a user's signature against reference signatures."""
+    try:
+        # Ensure required files are provided
+        if "user_image" not in request.files or "reference_image" not in request.files:
+            return jsonify({"error": "Missing image files"}), 400
+
+        # Save uploaded files
+        user_image = request.files["user_image"]
+        user_image_path = os.path.join(STATIC_FOLDER, "user_signature.jpg")
+        user_image.save(user_image_path)
+
+        reference_image = request.files["reference_image"]
+        reference_image_path = os.path.join(STATIC_FOLDER, "reference_signature.jpg")
+        reference_image.save(reference_image_path)
+
+        # Debugging: Print saved file paths
+        print("User Signature Path:", user_image_path)
+        print("Reference Signature Path:", reference_image_path)
+
+        # Dummy verification logic (Replace with real signature analysis)
+        verification_result = {
+            "input_image_url": f"/static/user_signature.jpg",
+            "reference_image_url": f"/static/reference_signature.jpg",
+            "match_confidence": 0.92  # Example confidence score
+        }
+
+        print("Verification Result:", verification_result)  # Debugging
+
+        return jsonify(verification_result), 200
 
     except Exception as e:
         print("Error:", str(e))
